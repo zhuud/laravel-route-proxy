@@ -1,0 +1,24 @@
+{
+    "name": "zhuud/laravel-route-proxy",
+    "type": "library",
+    "description": "Multi-route bulk call",
+    "keywords": ["laravel", "route", "proxy"],
+    "type":"library",
+    "license":"MIT",
+    "authors": [
+        {
+            "name": "zhuud",
+            "email": "daydifly@gmail.com",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "php": ">=5.6.0",
+        "laravel/framework": "~5.3"
+    },
+    "autoload": {
+        "psr-4": {
+            "Zhuud\\Proxy\\": "src/"
+        }
+    }
+}
