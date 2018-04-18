@@ -5,8 +5,6 @@ namespace Zhuud\Proxy;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Route;
 use Illuminate\Routing\RouteCollection;
-use Illuminate\Routing\Router;
-use Illuminate\Support\Facades\App;
 use Illuminate\Routing\Pipeline;
 
 
@@ -37,7 +35,7 @@ class RouteProxy
      *
      * @return static
      */
-    public function parse()
+    public static function parse()
     {
         if (!self::$instance instanceof static) {
 
@@ -74,6 +72,7 @@ class RouteProxy
      * verify the number of calls
      *
      * @param Request $request
+     * @return $this
      */
     public function verMaxCalls(Request $request)
     {
@@ -81,8 +80,10 @@ class RouteProxy
 
         if ($this->maxCalls < count($listAction)) {
 
-            throw new \LengthException('Too many calls given', 1000001);
+            throw new \LengthException('Too Many Calls Given', 1000001);
         }
+
+        return  $this;
     }
 
     /**
@@ -108,9 +109,6 @@ class RouteProxy
                 // 生成分发request
                 $curRequest = $this->genCurRequest($request, $params);
 
-                //$this->container->instance(Request::class, $curRequest);
-                //$this->container->instance(Route::class, $curRoute);
-
                 // 获取当前request的中间件
                 $listMiddleware = $this->getCurMiddleware($curRoute);
 
@@ -124,7 +122,7 @@ class RouteProxy
 
                 $this->result[$routeName] = [
                     'code'      => 1000002,
-                    'message'   => 'Action invalid.',
+                    'message'   => 'Action Invalid.',
                 ];
             }
         });
@@ -181,9 +179,9 @@ class RouteProxy
      */
     private function throughMiddleware(Request $curRequest, Route $curRoute, $listMiddleware)
     {
-        return  (new Pipeline(App::class))
+        return  (new Pipeline(app('app')))
             ->send($curRequest)
-            ->through(App::shouldSkipMiddleware() ? [] : $listMiddleware)
+            ->through(app('app')->shouldSkipMiddleware() ? [] : $listMiddleware)
             ->then(function ($curRequest) use ($curRoute) {
 
                 $response = $curRoute->bind($curRequest)->run();
@@ -200,23 +198,21 @@ class RouteProxy
      */
     private function handleResult($content, $routeName)
     {
-        // 代理路由过程中抛错的情况
+        // 代理路由过程中错误
         if ($content instanceof \Exception) {
 
             $this->result[$routeName] = [
-                'code'    => $content->getCode()    ? $content->getCode()       : 1000003,
-                'message' => $content->getMessage() ? $content->getMessage()    : 'Exception unknown.',
+                'code'    => $content->getCode()    ?? 1000000,
+                'message' => $content->getMessage() ?? 'Exception Unknown.',
             ];
-        // 正常情况
         } else {
 
             $this->result[$routeName] = [
                 'code'    => 0,
                 'message' => 'OK',
-                'data'    => json_decode($content->content(), true),
+                'data'    => json_decode($content->content(), true) ?? $content->content(),
             ];
         }
     }
-
 }
 
