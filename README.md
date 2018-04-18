@@ -42,7 +42,7 @@
   
   `{"foo.a":{"params1":[1,2],"params2":"123"},"foo.b":{"params":"asd"}}`
 
-##  路由
+## 路由
   
   ```
     Route::post('/', 'FooController@index');
@@ -50,3 +50,19 @@
     Route::post('/b', 'FooController@b')->name('foo.b');
   ```
   
+## 方法
+  ```
+     /**
+       * @param \Illuminate\Http\Request $request
+       * @param \Illuminate\Support\Facades\Route $route
+       * @return mixed
+       */
+      public function index(Request $request, Route $route)
+      {
+          return RouteProxy::parse()
+          ->setMaxCalls(8)
+          ->verMaxCalls($request)
+          ->dispatch($request,$route::getRoutes())
+          ->getResult();
+      }
+  ```
