@@ -109,11 +109,8 @@ class RouteProxy
                 // 生成分发request
                 $curRequest = $this->genCurRequest($request, $params);
 
-                // 获取当前request的中间件
-                $listMiddleware = $this->getCurMiddleware($curRoute);
-
                 // 走中间件、逻辑
-                $content = $this->throughMiddleware($curRequest, $curRoute, $listMiddleware);
+                $content = $this->throughMiddleware($curRequest, $curRoute);
 
                 // 处理结果
                 $this->handleResult($content, $routeName);
@@ -174,18 +171,23 @@ class RouteProxy
      *
      * @param Request $curRequest
      * @param Route $curRoute
-     * @param $listMiddleware
      * @return mixed
      */
-    private function throughMiddleware(Request $curRequest, Route $curRoute, $listMiddleware)
+    private function throughMiddleware(Request $curRequest, Route $curRoute)
     {
+        // 获取当前request的中间件
+        $listMiddleware = $this->getCurMiddleware($curRoute);
+        
+        // 走中间件
         return  (new Pipeline(app('app')))
             ->send($curRequest)
             ->through(app('app')->shouldSkipMiddleware() ? [] : $listMiddleware)
             ->then(function ($curRequest) use ($curRoute) {
 
+                // 走逻辑
                 $response = $curRoute->bind($curRequest)->run();
-
+                
+                // 返回结果
                 return  app('router')->prepareResponse($curRequest, $response);
             });
     }
