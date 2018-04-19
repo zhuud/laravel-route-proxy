@@ -10,6 +10,7 @@
  `app/Exceptions/Handler.php 文件 重写此方法`
 
   ```
+      use Symfony\Component\Debug\Exception\FatalErrorException;
      /**
        * Render an exception into an HTTP response.
        *
