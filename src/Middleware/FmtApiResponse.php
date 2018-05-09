@@ -37,10 +37,11 @@ class FmtApiResponse
             ]);
         }
 
+        $data = json_decode($response->content(), true);
         return  $this->returnJson([
             'code'      => 0,
             'message'   => 'OK',
-            'data'      => is_null(json_decode($response->content(), true)) ?? $response->content(),
+            'data'      => is_null($data) ? $response->content()    : $data,
         ]);
     }
 
