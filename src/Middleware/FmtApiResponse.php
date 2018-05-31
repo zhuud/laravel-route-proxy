@@ -32,8 +32,8 @@ class FmtApiResponse
         if ($response instanceof \Exception) {
 
             return $this->returnJson([
-                'code'      => $response->getCode()     ?? 1000000,
-                'message'   => $response->getMessage()  ?? 'Exception Unknown.',
+                'code'      => empty($code = $response->getCode())   ? config('error.default.code')  : $code,
+                'message'   => empty($msg = $response->getMessage())    ? config('error.default.msg')   : $msg,
             ]);
         }
 
